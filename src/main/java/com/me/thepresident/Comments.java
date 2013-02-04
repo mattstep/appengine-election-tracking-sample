@@ -2,6 +2,8 @@ package com.me.thepresident;
 import java.util.*;
 import com.google.appengine.api.datastore.*;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.memcache.MemcacheService;
+import com.google.appengine.api.memcache.MemcacheServiceFactory;
 
 public class Comments {
   static public void store(String text, String user) {
@@ -12,6 +14,20 @@ public class Comments {
 
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     datastore.put(commentEntity);
+    MemcacheServiceFactory.getMemcacheService().delete("100Comments"); //kill cache
+  }
+
+  public static List<Entity> retrieveAllCached()
+  {
+    MemcacheService cache = MemcacheServiceFactory.getMemcacheService();
+    List<Entity> comments = (List<Entity>)cache.get("100Comments");
+    if (comments == null)
+    {
+      comments = retrieveAll(); // read from datastore
+      if (comments != null)
+        cache.put("100Comments", comments); // store in memcache
+    }
+    return comments;
   }
 
   static public List<Entity> retrieveAll() {

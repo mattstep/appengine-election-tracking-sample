@@ -26,7 +26,7 @@
                 Comments.store(comment, user.getNickname());
             }
             // retrieve:
-            List<Entity> comments = Comments.retrieveAll();
+            List<Entity> comments = Comments.retrieveAllCached();
             for (Entity commentEntity: comments) {%>
                 <p><b><%=commentEntity.getProperty("user")%></b>: <%=commentEntity.getProperty("text")%></p>
          <% } %>
