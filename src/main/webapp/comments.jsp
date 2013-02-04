@@ -4,12 +4,23 @@
 <%@ page import="com.me.thepresident.Comments" %>
 <%@ page import="com.google.appengine.api.datastore.Entity" %>
 <%@ page import="java.util.List" %>
+<%@ page import="com.google.appengine.api.datastore.Query" %>
+<%@ page import="com.google.appengine.api.datastore.DatastoreServiceFactory" %>
+<%@ page import="java.util.Random" %>
+<%@ page import="java.util.Map" %>
 
 <html>
     <head><title>The president is...</title></head>
     <body>
-        <H1>The president is...</H1> <img src="obama.png" />
         <%
+            Random random = new Random();
+
+            Entity e = DatastoreServiceFactory.getDatastoreService().prepare(new Query("Elected")).asSingleEntity();
+            if (e == null) { %>
+                <H1>The president is still unknown.</H1><img src="<%= random.nextBoolean() ? "obama.png" : "romney.png" %>" />
+         <% } else { %>
+                <H1>The president is <%= e.getProperty("name") %></H1><img src="<%= e.getProperty("image") %>" />
+         <% }
             UserService userService = UserServiceFactory.getUserService();
             User user = userService.getCurrentUser();
             if (user == null)
