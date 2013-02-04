@@ -8,16 +8,24 @@
 <%@ page import="com.google.appengine.api.datastore.DatastoreServiceFactory" %>
 <%@ page import="java.util.Random" %>
 <%@ page import="java.util.Map" %>
+<%@ page import="com.google.appengine.api.memcache.MemcacheService" %>
+<%@ page import="com.google.appengine.api.memcache.MemcacheServiceFactory" %>
 
 <html>
     <head><title>The president is...</title></head>
     <body>
         <%
-            Random random = new Random();
-
+            MemcacheService cache = MemcacheServiceFactory.getMemcacheService();
             Entity e = DatastoreServiceFactory.getDatastoreService().prepare(new Query("Elected")).asSingleEntity();
             if (e == null) { %>
-                <H1>The president is still unknown.</H1><img src="<%= random.nextBoolean() ? "obama.png" : "romney.png" %>" />
+                <H1>The president is still unknown.</H1>
+                <table>
+                    <tr><td><img src="obama.png" /></td><td><img src="romney.png" /></td></tr>
+                    <tr style="text-align: center">
+                        <td><a href="/countTheVotes?name=obama">+1</a> <%=cache.get("obama")%></td>
+                        <td><a href="/countTheVotes?name=romney">+1</a> <%=cache.get("romney")%></td>
+                    </tr>
+                </table>
          <% } else { %>
                 <H1>The president is <%= e.getProperty("name") %></H1><img src="<%= e.getProperty("image") %>" />
          <% }
