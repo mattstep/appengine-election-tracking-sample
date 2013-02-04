@@ -1,6 +1,9 @@
 <! DOCTYPE html>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="com.google.appengine.api.users.*" %>
+<%@ page import="com.me.thepresident.Comments" %>
+<%@ page import="com.google.appengine.api.datastore.Entity" %>
+<%@ page import="java.util.List" %>
 
 <html>
     <head><title>The president is...</title></head>
@@ -16,11 +19,17 @@
         <%}
         else
         {
+            // store:
             String comment = request.getParameter("user-comment");
-            if (comment != null)
+            if (comment != null) {
                 comment = comment.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
-        %>
-        <p><b><%=user.getNickname()%>:</b> <%=comment%></p>
+                Comments.store(comment, user.getNickname());
+            }
+            // retrieve:
+            List<Entity> comments = Comments.retrieveAll();
+            for (Entity commentEntity: comments) {%>
+                <p><b><%=commentEntity.getProperty("user")%></b>: <%=commentEntity.getProperty("text")%></p>
+         <% } %>
 
         <form action="" method="post">
             <textarea name="user-comment"></textarea><br/>
